@@ -52,11 +52,11 @@ class Register extends Component {
   }
 
   componentWillReceiveProps(nextProps) {
-		if (nextProps.UI.errors) {
+	  if(nextProps.UI)
+		if (nextProps.UI.errors) 
 			this.setState({
 				errors: nextProps.UI.errors
 			});
-		}
 	}
 
   onChange(e) {

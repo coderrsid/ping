@@ -24,7 +24,7 @@ export const login = user => {
     })
     .then(response => {
       localStorage.setItem('usertoken', response.data)
-      return response.data
+      return response
     })
     .catch(err => {
       console.log(err)
@@ -45,6 +45,21 @@ export const updateProfile = user => {
     })
 }
 
+export const pushNotificationData = (userid, subscriptionId) => {
+  console.log('user function', subscriptionId);
+  return axios
+    .put(`users/subscription/${userid}`, {
+      user_subscription: subscriptionId
+    })
+    .then(response => {
+      console.log(response.data)
+      return response.data
+    })
+    .catch(err => {
+      console.log(err)
+    })
+}
+
 export const getList = (userid) => {
   return axios
       .get(`${userid}/api/tasks`, {
@@ -54,19 +69,21 @@ export const getList = (userid) => {
           var data = []
           Object.keys(res.data).forEach((key) => {
               var val = res.data[key]
-              data.push([val.title, val.id, val.reminder])
+              data.push([val.id, val.title, val.reminder, val.canvas])
           })
-
-          return data
+          console.log('user function', res);
+          return data;
+          
       })
 }
 
-export const addToList = (userid, term, reminder) => {
+export const addToList = (userid, term, reminder, canvas) => {
   return axios
       .post(
         `${userid}/api/task`, {
               title: term,
               reminder: reminder,
+              canvas: canvas
           }, {
               headers: { "Content-type": "application/json" }
           })
@@ -89,12 +106,13 @@ export const deleteItem = (id, userid) => {
       })
 }
 
-export const updateItem = (term, reminder, userid, id) => {
+export const updateItem = (term, reminder, canvas, userid, id) => {
   return axios
       .put(
           `${userid}/api/task/${id}`, {
               title: term,
-              reminder: reminder
+              reminder: reminder,
+              canvas: canvas
           }, {
               headers: { "Content-type": "application/json" }
           })

@@ -4,7 +4,7 @@ import withStyles from '@material-ui/core/styles/withStyles';
 import Typography from '@material-ui/core/Typography';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import { Card, CardActions, CardContent, Divider, Button, Grid, TextField } from '@material-ui/core';
-
+import withMyHook from './withMyHook';
 import clsx from 'clsx';
 import jwt_decode from 'jwt-decode'
 
@@ -65,6 +65,7 @@ class Account extends Component {
 			firstName: '',
 			lastName: '',
 			email: '',
+			subscription: '',
 			uiLoading: true,
 		};
 	}
@@ -80,6 +81,8 @@ class Account extends Component {
 			uiLoading: false,
 			buttonLoading: false,
 		});
+		if(decoded.identity.subscription)
+			this.setState({subscription: true});
     }
 
     handleChange = (event) => {
@@ -102,9 +105,13 @@ class Account extends Component {
 				this.setState({buttonLoading: false})
 			);
 	}
+
+	handlePushNotification = () => {
+		this.props.onClickUserPermission();
+	}
     
     render() {
-        const { classes, ...rest } = this.props;
+		const { classes, ...rest } = this.props;
 		if (this.state.uiLoading === true) {
 			return (
 				<main className={classes.content}>
@@ -144,7 +151,7 @@ class Account extends Component {
 											name="firstName"
 											variant="outlined"
 											value={this.state.firstName}
-											onChange={this.handleChange}
+											onChange={(e) => this.handleChange(e)}
 										/>
 									</Grid>
 									<Grid item md={6} xs={12}>
@@ -155,7 +162,7 @@ class Account extends Component {
 											name="lastName"
 											variant="outlined"
 											value={this.state.lastName}
-											onChange={this.handleChange}
+											onChange={(e) => this.handleChange(e)}
 										/>
 									</Grid>
 									<Grid item md={6} xs={12}>
@@ -167,8 +174,20 @@ class Account extends Component {
 											variant="outlined"
 											disabled={true}
 											value={this.state.email}
-											onChange={this.handleChange}
+											onChange={(e) => this.handleChange(e)}
 										/>
+									</Grid>
+									<Grid item md={6} xs={12}>
+									<Button
+										fullWidth
+										variant="contained"
+										color="primary"
+										className={classes.submit}
+										disabled={this.state.subscription}
+										onClick={this.handlePushNotification}
+									>
+										Enable Push Notifications
+									</Button>
 									</Grid>
 								</Grid>
 							</CardContent>
@@ -198,4 +217,4 @@ class Account extends Component {
 }
 
 
-export default withStyles(styles)(Account);
+export default withMyHook(withStyles(styles)(Account));

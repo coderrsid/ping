@@ -63,6 +63,7 @@ class Login extends Component {
 			  this.setState({
 				  errors: nextProps.UI.errors
 		  	});
+
 	}
 
   onChange(e) {

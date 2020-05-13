@@ -2,7 +2,9 @@ import React, { Component } from 'react';
 import { getList, addToList, deleteItem, updateItem } from './UserFunctions';
 import jwt_decode from 'jwt-decode'
 import moment from 'moment';
+import SignaturePad from 'react-signature-canvas';
 
+import Grow from '@material-ui/core/Fade';
 import withStyles from '@material-ui/core/styles/withStyles';
 import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
@@ -19,6 +21,7 @@ import Card from '@material-ui/core/Card';
 import CardActions from '@material-ui/core/CardActions';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import CardContent from '@material-ui/core/CardContent';
+import CardMedia from '@material-ui/core/CardMedia';
 
 const styles = (theme) => ({
 	content: {
@@ -52,7 +55,8 @@ const styles = (theme) => ({
 	},
 	toolbar: theme.mixins.toolbar,
 	root: {
-		minWidth: 470
+        minWidth: 380,
+        maxWidth: 500,
 	},
 	bullet: {
 		display: 'inline-block',
@@ -82,7 +86,21 @@ const styles = (theme) => ({
 		right: theme.spacing(1),
 		top: theme.spacing(1),
 		color: theme.palette.grey[500]
-	}
+    },
+    sigContainer: {
+        width: '100%',
+        height: '40vh',
+        margin: '0 auto',
+        backgroundColor: '#fff',
+        border: '1px solid black'
+    },
+    sigImage: {
+        backgroundSize: "200px 50px",
+        width: "200px",
+        height: "50px",
+        backgroundColor: "white"
+      }
+      
 });
 
 const Transition = React.forwardRef(function Transition(props, ref) {
@@ -102,43 +120,55 @@ class Todo extends Component {
             items: [],
             errors: [],
             uiLoading: true,
+            canvasDataURL: null,
+            showSigPad: false
         }
 
-        this.onSubmit = this.onSubmit.bind(this)
-        this.onChange = this.onChange.bind(this)
+        this.sigPad = React.createRef();
     }
 
     componentDidMount () {
         const token = localStorage.usertoken;
         const decoded = jwt_decode(token);
+        getList(decoded.identity.id).then(data => {
+            this.setState({
+                title: '',
+                reminder: '',
+                items: [...data]
+            });
+        })
         this.setState({userid: decoded.identity.id, uiLoading: false});
-        if(this.state.userid)
-            this.getAll();
     }
 
     onChange = e => {
         this.setState({
             [e.target.name] : e.target.value,
         })
+        console.log(e.target.value);
     }
 
     getAll = () => {
+        this.setState({uiLoading: true});
         getList(this.state.userid).then(data => {
+            console.log(data);
             this.setState({
+                id: '',
                 title: '',
                 reminder: '',
-                items: [...data]
-            },
-                () => {
-                    console.log(this.state.title)
-                })
+                open: '',
+                buttonType: '',
+                items: [...data],
+                uiLoading: false,
+                canvasDataURL: null,
+                showSigPad: false
+            });
         })
     }
 
     onSubmit = e => {
         e.preventDefault();
         this.setState({ editDisabled: '' })
-        addToList(this.state.userid ,this.state.title, this.state.reminder).then(() => {
+        addToList(this.state.userid ,this.state.title, this.state.reminder, this.state.canvasDataURL).then(() => {
             this.getAll()
         })
         this.handleClose();
@@ -147,7 +177,7 @@ class Todo extends Component {
     onUpdate = e => {
         console.log('update called');
         e.preventDefault();
-        updateItem(this.state.title, this.state.reminder, this.state.userid, this.state.id).then(() => {
+        updateItem(this.state.title, this.state.reminder, this.state.canvasDataURL, this.state.userid, this.state.id).then(() => {
             this.getAll()
         })
         this.handleClose();
@@ -173,9 +203,9 @@ class Todo extends Component {
 
     handleEditClickOpen = (data) => {
 		this.setState({
-			title: data[0],
-            id: data[1],
-            reminder: data[2],
+            id: data[0],
+			title: data[1],
+            canvasDataURL: data[3],
 			buttonType: 'Edit',
 			open: true
         });
@@ -185,86 +215,34 @@ class Todo extends Component {
         this.setState({
             id: '',
             title: '',
+            canvasDataURL: '',
             buttonType: '',
             open: true
         });
     };
 
+    handleSignPad = (e) => {
+        if(e === "remove"){
+            this.setState({canvasDataURL: ''});
+        } else {
+            let show = this.state.showSigPad;
+            this.setState({showSigPad: !show});
+        }
+    }
+
+    clear = () => {
+        this.sigPad.clear()
+    }
+
+    trim = () => {
+        this.setState({canvasDataURL: this.sigPad.getTrimmedCanvas()
+            .toDataURL('image/png')})
+    }
 
     render () {
-
     	const { classes } = this.props;
         const { open, errors } = this.state;
         
-        // return (
-        //     <div className="col-md-18">
-        //         <form onSubmit={this.onSubmit}>
-        //             <div className="form-group">
-        //                 <label className="col-md-4" htmlFor="input1">Task Name</label>
-        //                 <label className="col-md-5" htmlFor="input2">Reminder</label>
-        //                 <div className="row">
-        //                     <div className="col-md-4">
-        //                         <input
-        //                             type="text"
-        //                             className="form-control"
-        //                             id="input1"
-        //                             name="term"
-        //                             value={this.state.term || ''}
-        //                             onChange={this.onChange.bind(this)}
-        //                         />
-        //                     </div>
-        //                     <div className="col-md-5" >
-        //                        <input 
-        //                             type="datetime-local" 
-        //                             id="input2" 
-        //                             className="form-control" 
-        //                             name="reminder"
-        //                             value={this.state.reminder || ''}
-        //                             onChange={this.onChange.bind(this)}
-        //                         />
-        //                     </div>
-        //                     <div className="col-md-2">
-        //                         <button className="btn btn-primary"
-        //                             onClick={this.onUpdate.bind(this)}>
-        //                             Update
-        //                         </button>
-        //                     </div>
-        //                 </div>
-        //             </div>
-        //             <button className="btn btn-success btn-block"
-        //                 type="submit"
-        //                 onClick={this.onSubmit.bind(this)}>
-        //                 Submit
-        //             </button>
-        //         </form>
-        //         <table className="table">
-        //             <tbody>
-        //                 {this.state.items.map((item, index) => {
-        //                     console.log(item)
-        //                     return <tr key={index}>
-        //                         <td className="text-left">{item[0]}</td>
-        //                         <td className="text-center">{item[2] ? moment (new Date(item[2])).fromNow() : "No reminder"}</td>
-        //                         <td className="text-right">
-        //                             <button className="btn btn-info mr-1"
-        //                                 disabled={this.state.editDisabled}
-        //                                 onClick={this.onEdit.bind(this, item[0], item[2], item[1])}>
-        //                                 Edit
-        //                             </button>
-
-        //                             <button className="btn btn-danger"
-        //                                 disabled={this.state.editDisabled}
-        //                                 onClick={this.onDelete.bind(this, item[1])}>
-        //                                 Delete
-        //                             </button>
-        //                         </td>
-        //                     </tr>
-        //                 })}
-        //             </tbody>
-        //         </table>
-        //     </div>
-        // )
-
-
         if (this.state.uiLoading === true) {
 			return (
 				<main className={classes.content}>
@@ -324,12 +302,11 @@ class Todo extends Component {
 								</Grid>
 								<Grid item xs={20}>
                                     <TextField
-                                        variant="outlined"
-										required
-										fullWidth
                                         id="reminderDetails"
-                                        label="Reminder Time"
+                                        label="Reminder"
                                         type="datetime-local"
+                                        autoComplete="reminderDetails"
+                                        className={classes.textField}
                                         value={this.state.reminder}
                                         helperText={errors.reminder}
                                         error={errors.reminder ? true : false}
@@ -339,33 +316,75 @@ class Todo extends Component {
                                         }}
                                     />
 								</Grid>
+                                <br></br>
+                                <Grid item xs={12} >
+                                    {this.state.showSigPad ? 
+                                    <Grow in={this.state.showSigPad}>
+                                        <div style={{display: 'inline-block', border: '0.8px solid black', padding:'10px 10px'}}>
+                                            <SignaturePad
+                                            canvasProps={{height:'300', width: '600', }}
+                                                ref={(ref) => { this.sigPad = ref }} />
+                                            <div>
+                                                <Button variant="outlined" onClick={this.clear}>
+                                                Clear
+                                                </Button>
+                                                <Button variant="outlined" onClick={this.trim}>
+                                                Save
+                                                </Button>
+                                            </div>
+                                        </div>
+                                    </Grow>    
+                                        :
+                                        (
+                                            !this.state.canvasDataURL ? 
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                className={classes.submit}
+                                                onClick={() => this.handleSignPad("add")}
+                                                >
+                                                    Add Canvas
+                                            </Button> :
+                                            <Button
+                                                variant="contained"
+                                                color="primary"
+                                                className={classes.submit}
+                                                onClick={() => this.handleSignPad("remove")}
+                                            >
+                                                Remove Canvas
+                                            </Button>
+                                        )
+                                    }
+                                </Grid>
 							</Grid>
 						</form>
 					</Dialog>
 
 					<Grid container spacing={2}>
 						{this.state.items ? this.state.items.map((item) => (
-							<Grid key={item[1]} item xs={12} sm={6}>
+							<Grid key={item[0]} item xs={12} sm={6}>
 								<Card className={classes.root} variant="outlined">
 									<CardContent>
+                                        {item[3] ? <CardMedia className={classes.sigImage} image={item[3]} /> : null}
 										<Typography variant="h5" component="h2">
-											{item[0]}
+											{item[1]}
 										</Typography>
 										<Typography className={classes.pos} color="textSecondary">
                                             {item[2] ? moment (new Date(item[2])).fromNow() : "No reminder"}
 										</Typography>
+                                        
 									</CardContent>
 									<CardActions>
 										<Button size="small" color="primary" onClick={(e) => this.handleEditClickOpen(item)}>
 											Edit
 										</Button>
-										<Button size="small" color="primary" onClick={(e) => this.onDelete(item[1])}>
+										<Button size="small" color="primary" onClick={(e) => this.onDelete(item[0])}>
 											Delete
 										</Button>
 									</CardActions>
 								</Card>
 							</Grid>
-						)) : <h1>No reminders!</h1>}
+                        )) : <h1>No reminders!</h1>}
                         
 					</Grid>
 				</main>

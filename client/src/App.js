@@ -6,15 +6,27 @@ import Home from './components/Home'
 import NoMatch from './components/NoMatch'
 
 class App extends Component {
-  render() {
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      token: null
+    }
+  }
+  componentWillMount() {
     const token = localStorage.usertoken;
-    console.log(token);
+    this.setState({token: token});
+    console.log(this.state.token);
+  }
+
+  render() {
+    
     return (
       <Router>
           <Switch>
              <Route exact path="/">
               {
-                token ? <Home /> : <Redirect to="/login" />
+                this.state.token ? <Home /> : <Redirect to="/login" />
               }
             </Route>
             <Route exact path="/register" component={Register} />
