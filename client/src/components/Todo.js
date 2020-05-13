@@ -144,7 +144,6 @@ class Todo extends Component {
         this.setState({
             [e.target.name] : e.target.value,
         })
-        console.log(e.target.value);
     }
 
     getAll = () => {
@@ -204,7 +203,8 @@ class Todo extends Component {
     handleEditClickOpen = (data) => {
 		this.setState({
             id: data[0],
-			title: data[1],
+            title: data[1],
+            reminder: data[2],
             canvasDataURL: data[3],
 			buttonType: 'Edit',
 			open: true
@@ -242,7 +242,7 @@ class Todo extends Component {
     render () {
     	const { classes } = this.props;
         const { open, errors } = this.state;
-        
+
         if (this.state.uiLoading === true) {
 			return (
 				<main className={classes.content}>
@@ -273,7 +273,6 @@ class Todo extends Component {
 									{this.state.buttonType === 'Edit' ? 'Edit Reminder' : 'Create a new Reminder'}
 								</Typography>
 								<Button
-									autoFocus
 									color="inherit"
 									onClick={(e) => this.state.buttonType === 'Edit' ? this.onUpdate(e) : this.onSubmit(e)}
 									className={classes.submitButton}
@@ -287,6 +286,7 @@ class Todo extends Component {
 							<Grid container spacing={2}>
 								<Grid item xs={12}>
 									<TextField
+                                        autoFocus
 										variant="outlined"
 										required
 										fullWidth
@@ -302,15 +302,16 @@ class Todo extends Component {
 								</Grid>
 								<Grid item xs={20}>
                                     <TextField
-                                        id="reminderDetails"
-                                        label="Reminder"
+                                       id="datetime-local"
+                                        label="Next appointment"
                                         type="datetime-local"
-                                        autoComplete="reminderDetails"
+                                        name="reminder"
                                         className={classes.textField}
                                         value={this.state.reminder}
                                         helperText={errors.reminder}
                                         error={errors.reminder ? true : false}
                                         onChange={this.onChange.bind(this)}
+                                        InputProps={{inputProps: { min: new Date().toJSON().slice(0,10).replace(/-/g,'/'), max: "2020-05-04"} }}
                                         InputLabelProps={{
                                             shrink: true,
                                         }}

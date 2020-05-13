@@ -74,10 +74,9 @@ class Home extends Component {
 
 	componentDidMount () {
 		const token = localStorage.usertoken;
-		if(token) {
-			const decoded = jwt_decode(token);
-        	this.setState({firstName: decoded.identity.first_name, lastName: decoded.identity.last_name, uiLoading: false});
-		}
+		const decoded = jwt_decode(token);
+		this.setState({firstName: decoded.identity.first_name, lastName: decoded.identity.last_name, uiLoading: false});
+		console.log(this.state);
     }
 
   	state = {
@@ -113,7 +112,7 @@ class Home extends Component {
 					<AppBar position="fixed" className={classes.appBar}>
 						<Toolbar>
 							<Typography variant="h6" noWrap>
-								Reminder PRO
+								Ping!
 							</Typography>
 						</Toolbar>
 					</AppBar>
@@ -127,7 +126,7 @@ class Home extends Component {
 						<div className={classes.toolbar} />
 						<Divider />
 						<center>
-							<Avatar src={this.state.profilePicture} className={classes.avatar} />
+							<Avatar src={`https://robohash.org/${this.state.firstName}?200x200`} className={classes.avatar} />
 							<p>
 								{' '}
 								{this.state.firstName} {this.state.lastName}

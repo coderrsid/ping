@@ -3,4 +3,6 @@ config.py
 vapid_private.pem
 public_key.txt
 private_key.txt
+vapid_private.pem
+private_key.pem
 __pycache__

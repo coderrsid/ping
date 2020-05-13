@@ -63,10 +63,12 @@ async function createNotificationSubscription() {
   // subscribe and return the subscription
   const applicationServerKey = urlB64ToUint8Array(pushServerPublicKey)
   // console.log(applicationServerKey)
-  return await serviceWorker.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: applicationServerKey
-  })
+  return await navigator.serviceWorker.ready.then(
+    await serviceWorker.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: applicationServerKey
+    })
+  )
 }
 
 /**
