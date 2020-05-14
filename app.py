@@ -7,18 +7,9 @@ from flask_jwt_extended import JWTManager
 from flask_jwt_extended import (create_access_token)
 from pywebpush import webpush, WebPushException
 from celery import Celery
-import logging
-import json, os
 
 app = Flask(__name__)
-app.config.from_object("config")
-app.secret_key = app.config['SECRET_KEY']
-
-# client = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
-# client.conf.update(app.config)
-
-DER_BASE64_ENCODED_PRIVATE_KEY_FILE_PATH = os.path.join(os.getcwd(),"private_key.txt")
-DER_BASE64_ENCODED_PUBLIC_KEY_FILE_PATH = os.path.join(os.getcwd(),"public_key.txt")
+app.secret_key = 'SECRET KEY'
 
 app.config['MYSQL_HOST'] = 'sql12.freesqldatabase.com'
 app.config['MYSQL_USER'] = 'sql12339238'
