@@ -38,7 +38,7 @@ export const updateProfile = user => {
       last_name: user.lastName
     })
     .then(response => {
-      console.log(response.data)
+      return(response.data)
     })
     .catch(err => {
       console.log(err)
@@ -46,10 +46,10 @@ export const updateProfile = user => {
 }
 
 export const pushNotificationData = (userid, subscriptionId) => {
-  console.log('user function', subscriptionId);
+  console.log(userid, subscriptionId);
   return axios
     .put(`users/subscription/${userid}`, {
-      user_subscription: subscriptionId
+      subscription: subscriptionId
     })
     .then(response => {
       console.log(response.data)

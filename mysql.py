@@ -43,11 +43,11 @@ celery.conf.update(app.config)
 def sendPushNotification(user, title):
     try:
         webpush(
-            subscription_info=user['subscription'],
+            subscription_info=json.loads(user['subscription']),
             data="Task : "+str(title),
-            vapid_private_key="LxAtbajIswCrtgxc5NhmnTh-yXxWA_YZPap16_UqDq8",
+            vapid_private_key="./private_key.pem",
             vapid_claims={
-                "sub": "mailto:" + str(user['email']),
+                "sub": "mailto:"+str(user['email']),
             }
         )
     except WebPushException as ex:
@@ -70,7 +70,7 @@ def convertToBinaryData(filename):
 
 def calculatedDuration(time1, time2):
     timedelta = time2 - time1
-    return timedelta.days * 24 * 3600 + timedelta.seconds
+    return int(timedelta.total_seconds())
 
 def pushTask(userid, taskid):
     cur = mysql.connection.cursor()
@@ -143,14 +143,13 @@ def user_update(userid):
 
     cur.execute("UPDATE users SET first_name = '"+ str(first_name) + "', last_name = '" + str(last_name) + "' where id = " + userid)
     mysql.connection.commit()
-    result = {'first_name':first_name, 'last_name': last_name}
-    return jsonify({"result": result})
+    return jsonify({'first_name':first_name, 'last_name': last_name})
 
 @app.route('/users/subscription/<userid>', methods=['PUT'])
 def update_subscription(userid):
     cur = mysql.connection.cursor()
-    subscription = request.get_json()['user_subscription']
-    cur.execute("UPDATE users SET subscription = '" + subscription + "' where id = " + userid)
+    subscriptionId = request.get_json()['subscription']
+    cur.execute("UPDATE users SET subscription = '" + str(subscriptionId) + "' where id = " + userid)
     mysql.connection.commit()
     result = {'status':subscription, 'userid': userid}
     return jsonify({"result": result})

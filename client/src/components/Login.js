@@ -77,6 +77,10 @@ class Login extends Component {
       password: this.state.password
     }
 
+    if (/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[A-Za-z]+$/.test(user.email)) {
+      this.setState({errors:{ email : true}})
+    }
+
     login(user).then(res => {
       if (!res.error) {
         this.props.history.push(`/`)

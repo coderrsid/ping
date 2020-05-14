@@ -65,7 +65,7 @@ class Account extends Component {
 			firstName: '',
 			lastName: '',
 			email: '',
-			subscription: '',
+			subscription: false,
 			uiLoading: true,
 		};
 	}
@@ -101,9 +101,13 @@ class Account extends Component {
 		};
 
 		updateProfile(user)
-			.then(
-				this.setState({buttonLoading: false})
-			);
+			.then(function(response) {
+				user.firstName = response.first_name;
+				user.lastName = response.last_name;
+			}
+		);
+
+		this.setState({firstName: user.firstName, lastName: user.lastName});
 	}
 
 	handlePushNotification = () => {
@@ -202,13 +206,11 @@ class Account extends Component {
 						className={classes.submitButton}
 						onClick={this.updateFormValues}
 						disabled={
-							this.state.buttonLoading ||
 							!this.state.firstName ||
 							!this.state.lastName
 						}
 					>
 						Save details
-						{this.state.buttonLoading && <CircularProgress size={30} className={classes.progess} />}
 					</Button>
 				</main>
 			);

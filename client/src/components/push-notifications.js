@@ -1,3 +1,6 @@
+import jwt_decode from 'jwt-decode';
+import { pushNotificationData } from './UserFunctions';
+
 const pushServerPublicKey = "BFP1Dt3LZz9md5h8bZjAru8fY-ACbUFLpI4-Ln0lBrhMd694T_ujWSM6cxq_bu6SYMaV6pB3aRwprWdt_ufrqi0";
 
 function urlB64ToUint8Array(base64String) {
@@ -25,27 +28,6 @@ async function askUserPermission() {
   return await Notification.requestPermission();
 }
 /**
- * shows a notification
- */
-function sendNotification() {
-  const img = "/images/jason-leung-HM6TMmevbZQ-unsplash.jpg";
-  const text = "Take a look at this brand new t-shirt!";
-  const title = "New Product Available";
-  const options = {
-    body: text,
-    icon: "/images/jason-leung-HM6TMmevbZQ-unsplash.jpg",
-    vibrate: [200, 100, 200],
-    tag: "new-product",
-    image: img,
-    badge: "https://spyna.it/icons/android-icon-192x192.png",
-    actions: [{ action: "Detail", title: "View", icon: "https://via.placeholder.com/128/ff0000" }]
-  };
-  navigator.serviceWorker.ready.then(function(serviceWorker) {
-    serviceWorker.showNotification(title, options);
-  });
-}
-
-/**
  *
  */
 function registerServiceWorker() {
@@ -59,16 +41,33 @@ function registerServiceWorker() {
  */
 async function createNotificationSubscription() {
   //wait for service worker installation to be ready
-  const serviceWorker = await navigator.serviceWorker.ready;
   // subscribe and return the subscription
   const applicationServerKey = urlB64ToUint8Array(pushServerPublicKey)
   // console.log(applicationServerKey)
-  return await navigator.serviceWorker.ready.then(
-    await serviceWorker.pushManager.subscribe({
-      userVisibleOnly: true,
-      applicationServerKey: applicationServerKey
-    })
-  )
+  return navigator.serviceWorker.ready.then(
+    function(serviceWorkerRegistration) {
+      var options = {
+        userVisibleOnly: true,
+        applicationServerKey: applicationServerKey
+      };
+      serviceWorkerRegistration.pushManager.subscribe(options).then(
+        function(pushSubscription) {
+          const token = localStorage.usertoken;
+          const decoded = jwt_decode(token);
+          const subscription = JSON.stringify(pushSubscription);
+          pushNotificationData(decoded.identity.id, subscription);
+          // The push subscription details needed by the application
+          // server are now available, and can be sent to it using,
+          // for example, an XMLHttpRequest.
+        }, function(error) {
+          // During development it often helps to log errors to the
+          // console. In a production environment it might make sense to
+          // also report information about errors back to the
+          // application server.
+          console.log(error);
+        }
+      );
+    });
 }
 
 /**
@@ -89,7 +88,6 @@ export {
   isPushNotificationSupported,
   askUserPermission,
   registerServiceWorker,
-  sendNotification,
   createNotificationSubscription,
   getUserSubscription
 };

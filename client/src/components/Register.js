@@ -39,8 +39,8 @@ class Register extends Component {
   constructor() {
     super()
     this.state = {
-      first_name: '',
-      last_name: '',
+      firstName: '',
+      lastName: '',
       email: '',
       password: '',
       errors: {},
@@ -60,6 +60,12 @@ class Register extends Component {
 	}
 
   onChange(e) {
+	if(e.target.name === "email") {
+		if (/^[a-zA-Z0-9]+@[a-zA-Z0-9]+\.[A-Za-z]+$/.test(e.target.value)) {
+			this.setState({errors : { email : true} })
+			console.log("email error");
+		}
+	}
     this.setState({ [e.target.name]: e.target.value })
   }
   onSubmit(e) {
@@ -70,7 +76,7 @@ class Register extends Component {
       last_name: this.state.last_name,
       email: this.state.email,
       password: this.state.password
-    }
+	}
 
     register(newUser).then(res => {
       this.props.history.push(`/login`)
@@ -172,7 +178,7 @@ class Register extends Component {
 							color="primary"
 							className={classes.submit}
 							onClick={this.onSubmit}
-                            disabled={loading || 
+                            disabled={!errors || loading || 
                                 !this.state.email || 
                                 !this.state.password ||
                                 !this.state.firstName || 

@@ -83,11 +83,10 @@ export default function usePushNotifications() {
     setLoading(true);
     setError(false);
     createNotificationSubscription()
-      .then(function(subscrition) {
-        setUserSubscription(subscrition);
-        onClickSendSubscriptionToPushServer(subscrition);
+      .then(function(subscription) {
+        console.log(subscription);
+        onClickSendSubscriptionToPushServer(subscription);
         setLoading(false);
-        console.log('subscibed2');
       })
       .catch(err => {
         console.error("Couldn't create the notification subscription", err, "name:", err.name, "message:", err.message, "code:", err.code);
@@ -105,6 +104,7 @@ export default function usePushNotifications() {
     setError(false);
     const token = localStorage.usertoken;
     const decoded = jwt_decode(token);
+    console.log(subscription);
     setPushServerSubscriptionId(subscription);
     subscription = JSON.stringify(subscription);
     pushNotificationData(decoded.identity.id, subscription);
