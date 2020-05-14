@@ -83,8 +83,8 @@ def pushTask(userid, taskid):
 @app.route('/users/register', methods=['POST'])
 def register():
     cur = mysql.connection.cursor()
-    first_name = request.get_json()['first_name']
-    last_name = request.get_json()['last_name']
+    first_name = request.get_json()['firstName']
+    last_name = request.get_json()['lastName']
     email = request.get_json()['email']
     password = bcrypt.generate_password_hash(request.get_json()['password']).decode('utf-8')
     created = datetime.utcnow()
@@ -124,6 +124,13 @@ def login():
     else:
         result = jsonify({"error":"Invalid username and password"})
     
+    return result
+
+@app.route('/users/account/<userid>', methods=['GET'])
+def user_profile(userid):
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM users where id = " + userid)
+    result = cur.fetchone()
     return result
 
 @app.route('/users/update/<userid>', methods=['PUT'])
