@@ -23,7 +23,7 @@ MarkupSafe==1.1.1
 mysqlclient==1.4.6
 py-vapid==1.7.0
 pycparser==2.20
-PyJWT==1.7.1
+PyJWT==2.4.0
 pytz==2020.1
 pywebpush==1.11.0
 redis==3.5.1
